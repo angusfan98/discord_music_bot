@@ -35,7 +35,6 @@ class music(commands.Cog):
         #Using VideosSearch to search for the first result returned from a youtube search using the user input from discord
         videosSearch = VideosSearch(search_key,limit=1)
         url = videosSearch.result()['result'][0]['link']
-        print(url)
 
         if ctx.author.voice is None:
             await ctx.send("Please join a channel first!")

@@ -24,7 +24,7 @@ class music(commands.Cog):
             await ctx.voice_client.move_to(voice_channel)
     
     @commands.command()
-    async def byebye(self,ctx):
+    async def leave(self,ctx):
         await ctx.voice_client.disconnect()
 
     def setup(client):
@@ -55,23 +55,33 @@ class music(commands.Cog):
             source = await discord.FFmpegOpusAudio.from_probe(url_2, **FFMPEG_OPTIONS)
             yt = YouTube(url)
             title = yt.streams[0].title
-            embed=discord.Embed(title="Now playing",  
-                            description=title, 
-                            color=0x0DC7C7)
-            await ctx.send(embed=embed)
-            vc.play(source=source,after=lambda e:play_next())
+            if ctx.voice_client.is_playing():
+                queue.append(source)
+                title_queue.append(title)
+                title_str = "Queue Position: " + str(len(title_queue))
+                embed=discord.Embed(title=title_str,  
+                                    description=title_queue[len(title_queue)-1], 
+                                    color=0x0DC7C7)
+                await ctx.send(embed=embed)
+
+            else:
+                embed=discord.Embed(title="Now playing",  
+                                    description=title, 
+                                    color=0x0DC7C7)
+                await ctx.send(embed=embed)
+                vc.play(source=source,after=lambda e:play_next())
             
-            def play_next():
-                if len(queue) > 0:
-                    vc = ctx.voice_client
-                    title = yt.streams[0].title
-                    embed=discord.Embed(title="Now playing",  
-                            description=title_queue[0], 
-                            color=0x0DC7C7)
-                    asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), self.client.loop)
-                    vc.play(queue[0],after=lambda e:play_next())
-                    del(queue[0])
-                    del(title_queue[0])
+                def play_next():
+                    if len(queue) > 0:
+                        vc = ctx.voice_client
+                        title = yt.streams[0].title
+                        embed=discord.Embed(title="Now playing",  
+                                description=title_queue[0], 
+                                color=0x0DC7C7)
+                        asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), self.client.loop)
+                        vc.play(queue[0],after=lambda e:play_next())
+                        del(queue[0])
+                        del(title_queue[0])
 
 
     @commands.command()
@@ -89,7 +99,10 @@ class music(commands.Cog):
         def play_next():
             if len(queue) > 0:
                 vc = ctx.voice_client
-                asyncio.run_coroutine_threadsafe(ctx.send('**Now playing:** {}'.format(title_queue[0])), self.client.loop)
+                embed=discord.Embed(title="Now playing",  
+                                description=title_queue[0], 
+                                color=0x0DC7C7)
+                asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), self.client.loop)
                 vc.play(queue[0],after=lambda e:play_next())
                 del(queue[0])
                 del(title_queue[0])
@@ -127,9 +140,11 @@ class music(commands.Cog):
         yt = YouTube(url)
         title = yt.streams[0].title
         title_queue.append(title)
-        await ctx.send(f'`Queue:`')
-        for i in range(len(queue)):
-            await ctx.send(f'`{i+1}: {title_queue[i]}`')
+        title_str = "Queue Position: " + str(len(title_queue))
+        embed=discord.Embed(title=title_str,  
+                            description=title_queue[len(title_queue)-1], 
+                            color=0x0DC7C7)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def remove(self,ctx,number):
@@ -138,9 +153,11 @@ class music(commands.Cog):
         try:
             del(queue[int(number)-1])
             del(title_queue[int(number)-1])
-            await ctx.send(f'`Queue:`')
-            for i in range(len(queue)):
-                await ctx.send(f'`{i+1}: {title_queue[i]}`')
+            title_str = "Queue Position: " + str(len(title_queue))
+            embed=discord.Embed(title=title_str,  
+                            description=title_queue[len(title_queue)-1], 
+                            color=0x0DC7C7)
+            await ctx.send(embed=embed)
         except:
             await ctx.send('There is no song in that queue position!')
     
@@ -148,9 +165,13 @@ class music(commands.Cog):
     async def view(self,ctx):
         global queue
         global title_queue
-        await ctx.send(f'`Queue:`')
+        string = ""
         for i in range(len(title_queue)):
-            await ctx.send(f'`{i+1}: {title_queue[i]}`')
+            string = string + str(i+1) + ": " + title_queue[i] + "\n"
+        embed=discord.Embed(title="Queue:",  
+                            description=string, 
+                            color=0x0DC7C7)
+        await ctx.send(embed=embed)
 
 
 def setup(client):

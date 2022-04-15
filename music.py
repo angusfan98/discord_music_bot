@@ -5,6 +5,9 @@ import youtube_dl
 from youtubesearchpython import VideosSearch
 from pytube import YouTube
 import asyncio
+import urllib.request
+import json
+import urllib
 
 queue = []
 title_queue = []
@@ -53,8 +56,16 @@ class music(commands.Cog):
             info = ydl.extract_info(url, download=False)
             url_2 = info['formats'][0]['url']
             source = await discord.FFmpegOpusAudio.from_probe(url_2, **FFMPEG_OPTIONS)
-            yt = YouTube(url)
-            title = yt.streams[0].title
+            VideoID = url.split("?v=",1)[1]
+            params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % VideoID}
+            url = "https://www.youtube.com/oembed"
+            query_string = urllib.parse.urlencode(params)
+            url = url + "?" + query_string
+
+            with urllib.request.urlopen(url) as response:
+                response_text = response.read()
+                data = json.loads(response_text.decode())
+                title = data['title']   
             if ctx.voice_client.is_playing():
                 queue.append(source)
                 title_queue.append(title)
@@ -74,7 +85,6 @@ class music(commands.Cog):
                 def play_next():
                     if len(queue) > 0:
                         vc = ctx.voice_client
-                        title = yt.streams[0].title
                         embed=discord.Embed(title="Now playing",  
                                 description=title_queue[0], 
                                 color=0x0DC7C7)
@@ -82,30 +92,6 @@ class music(commands.Cog):
                         vc.play(queue[0],after=lambda e:play_next())
                         del(queue[0])
                         del(title_queue[0])
-
-
-    @commands.command()
-    async def playQ(self,ctx):
-        if ctx.author.voice is None:
-            await ctx.send("Please join a channel first!")
-        #Connects to the voice channel if not already in
-        voice_channel = ctx.author.voice.channel
-        if ctx.voice_client is None:
-            await voice_channel.connect()
-            ctx.voice_client.stop()
-        vc = ctx.voice_client
-        vc.play(source=queue[0],after=lambda e:play_next())
-        del(queue[0])
-        def play_next():
-            if len(queue) > 0:
-                vc = ctx.voice_client
-                embed=discord.Embed(title="Now playing",  
-                                description=title_queue[0], 
-                                color=0x0DC7C7)
-                asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), self.client.loop)
-                vc.play(queue[0],after=lambda e:play_next())
-                del(queue[0])
-                del(title_queue[0])
     
     @commands.command()
     async def pause(self, ctx):
@@ -137,8 +123,16 @@ class music(commands.Cog):
             source = await discord.FFmpegOpusAudio.from_probe(url_2, **FFMPEG_OPTIONS)
 
         queue.append(source)
-        yt = YouTube(url)
-        title = yt.streams[0].title
+        VideoID = url.split("?v=",1)[1]
+        params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % VideoID}
+        url = "https://www.youtube.com/oembed"
+        query_string = urllib.parse.urlencode(params)
+        url = url + "?" + query_string
+
+        with urllib.request.urlopen(url) as response:
+            response_text = response.read()
+            data = json.loads(response_text.decode())
+            title = data['title'] 
         title_queue.append(title)
         title_str = "Queue Position: " + str(len(title_queue))
         embed=discord.Embed(title=title_str,  

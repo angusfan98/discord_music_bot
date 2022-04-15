@@ -94,6 +94,7 @@ class music(commands.Cog):
                                     color=0x0DC7C7)
                 await ctx.send(embed=embed)
                 vc.play(source=source,after=lambda e:play_next())
+                print("playing audio")
             
                 def play_next():
                     if len(queue) > 0:
@@ -103,6 +104,7 @@ class music(commands.Cog):
                                 color=0x0DC7C7)
                         asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), self.client.loop)
                         vc.play(queue[0],after=lambda e:play_next())
+                        print("playing next")
                         del(queue[0])
                         del(title_queue[0])
     

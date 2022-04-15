@@ -110,21 +110,25 @@ class music(commands.Cog):
     
     @commands.command()
     async def pause(self, ctx):
+        print("paused audio")
         await ctx.voice_client.pause()
         await ctx.send("Paused")
 
     @commands.command()
     async def resume(self, ctx):
+        print("resuming audio")
         await ctx.voice_client.resume()
         await ctx.send("Resume")
 
     @commands.command()
     async def skip(self, ctx):
+        print("skipping audio")
         ctx.voice_client.stop()
         await ctx.send("Skipped")
 
     @commands.command()
     async def queue(self,ctx, *, search_key):
+        print("queueing song")
         global queue
         global title_queue
         videosSearch = VideosSearch(search_key,limit=1)
@@ -157,6 +161,7 @@ class music(commands.Cog):
 
     @commands.command()
     async def remove(self,ctx,number):
+        print("removing song in queue")
         global queue
         global title_queue
         try:

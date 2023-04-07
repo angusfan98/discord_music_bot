@@ -9,6 +9,7 @@ import urllib.request
 import json
 import urllib
 
+
 queue = []
 title_queue = []
 
@@ -95,6 +96,17 @@ class music(commands.Cog):
                 await ctx.send(embed=embed)
                 vc.play(source=source,after=lambda e:play_next())
                 print("playing audio")
+                
+
+                #https://stackoverflow.com/questions/63658589/how-to-make-a-discord-bot-leave-the-voice-channel-after-being-inactive-for-x-min
+                #while vc.is_playing(): #Checks if voice is playing
+                    #await asyncio.sleep(1) #While it's playing it sleeps for 1 second
+                #else:
+                   # await asyncio.sleep(300) #If it's not playing it waits 15 seconds
+                    #while vc.is_playing(): #and checks once again if the bot is not playing
+                     #   break #if it's playing it breaks
+                   # else:
+                     #   await vc.disconnect()
             
                 def play_next():
                     if len(queue) > 0:
@@ -186,7 +198,30 @@ class music(commands.Cog):
                             description=string, 
                             color=0x0DC7C7)
         await ctx.send(embed=embed)
-
+    
+    @commands.command()
+    async def reminder(self, ctx, time, *, task):
+        def convert(time):
+            pos = ['s','m','h','d']
+            time_dict = {"s":1,"m":60,"h":3600,"d":3600*24}
+            unit = time[-1]
+            if unit not in pos:
+                return -1
+            try:
+                val = int(time[:-1])
+            except:
+                return -2
+            return val*time_dict[unit]
+        converted_time = convert(time)
+        if converted_time == -1:
+            await ctx.send("Please input an integer along with s/m/h/d")
+            return
+        if converted_time == -2:
+            await ctx.send("Please type an integer along with s/m/h/d")
+            return
+        await ctx.send(f"Reminder for **{task}** for **{time}**")
+        await asyncio.sleep(converted_time)
+        await ctx.send(f"{ctx.author.mention} Remind for:**{task}**")
 
 def setup(client):
     client.add_cog(music(client))

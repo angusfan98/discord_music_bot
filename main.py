@@ -9,7 +9,7 @@ load_dotenv()
 cogs = [music]
 
 #API_KEY = os.getenv("API_KEY")
-API_KEY = "OTIwNTg4MjcwMTA5MzUxOTU3.Ybmiow.t-Bq9kq-YJaq8BShWZmH9bjEb0k"
+API_KEY = "OTIwNTg4MjcwMTA5MzUxOTU3.GeWFjq.HSn9IlnjBIoW2kdqWmGHnFRaOew859wf3ZmPAg"
 client = commands.Bot(command_prefix='?', intents = discord.Intents.all())
 
 @client.event
